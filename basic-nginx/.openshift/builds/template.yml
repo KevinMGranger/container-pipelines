@@ -32,6 +32,9 @@ objects:
     - type: "GitHub"
       github:
         secret: ${GITHUB_WEBHOOK_SECRET}
+    - type: "GitLab"
+      gitlab:
+        secret: ${GITLAB_WEBOOK_SECRET}
     - type: "ConfigChange"
     strategy:
       type: "JenkinsPipeline"
@@ -110,6 +113,11 @@ parameters:
   from: '[a-zA-Z0-9]{8}'
   generate: expression
   name: GITHUB_WEBHOOK_SECRET
+  required: true
+- description: GitLab trigger secret
+  from: '[a-zA-Z0-9]{8}'
+  generate: expression
+  name: GITLAB_WEBHOOK_SECRET
   required: true
 - description: Generic build trigger secret
   from: '[a-zA-Z0-9]{8}'
