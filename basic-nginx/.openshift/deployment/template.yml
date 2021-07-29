@@ -17,7 +17,7 @@ objects:
       app.kubernetes.io/part-of: ${APPLICATION_NAME}
       app.kubernetes.io/managed-by: applier
     name: ${APPLICATION_NAME}
-    namespace: ${APPLICATION_NAME}${ENV}
+    namespace: ${NAMESPACE_PREFIX}${APPLICATION_NAME}${ENV}
   spec:
     replicas: 1
     selector:
@@ -72,7 +72,7 @@ objects:
       app.kubernetes.io/part-of: ${APPLICATION_NAME}
       app.kubernetes.io/managed-by: applier
     name: ${APPLICATION_NAME}
-    namespace: ${APPLICATION_NAME}${ENV}
+    namespace: ${NAMESPACE_PREFIX}${APPLICATION_NAME}${ENV}
 - apiVersion: route.openshift.io/v1
   kind: Route
   metadata:
@@ -85,7 +85,7 @@ objects:
       app.kubernetes.io/part-of: ${APPLICATION_NAME}
       app.kubernetes.io/managed-by: applier
     name: ${APPLICATION_NAME}
-    namespace: ${APPLICATION_NAME}${ENV}
+    namespace: ${NAMESPACE_PREFIX}${APPLICATION_NAME}${ENV}
   spec:
     host: ${HOSTNAME_HTTP}
     to:
@@ -102,7 +102,7 @@ objects:
       app.kubernetes.io/part-of: ${APPLICATION_NAME}
       app.kubernetes.io/managed-by: applier
     name: ${APPLICATION_NAME}
-    namespace: ${APPLICATION_NAME}${ENV}
+    namespace: ${NAMESPACE_PREFIX}${APPLICATION_NAME}${ENV}
   spec:
     ports:
     - name: 8080-tcp
@@ -122,7 +122,7 @@ objects:
       app.kubernetes.io/part-of: ${APPLICATION_NAME}
       app.kubernetes.io/managed-by: applier
     name: jenkins_edit
-    namespace: ${APPLICATION_NAME}${ENV}
+    namespace: ${NAMESPACE_PREFIX}${APPLICATION_NAME}${ENV}
   groupNames: null
   roleRef:
     apiGroup: rbac.authorization.k8s.io
@@ -135,6 +135,9 @@ objects:
   userNames:
   - system:serviceaccount:${SA_NAMESPACE}:${SA_NAME}
 parameters:
+- description: What to prepend to the namespace of the application
+  name: NAMESPACE_PREFIX
+  required: false
 - description: The name for the application.
   name: APPLICATION_NAME
   required: true

@@ -2,32 +2,48 @@ source_code_url: https://github.com/redhat-cop/container-pipelines.git
 source_code_ref: master
 skip_manual_promotion: false
 
+namespace_prefix: "{{ lookup('env', 'nginx_namespace_prefix') | default('', True) }}"
+build_ns: "{{ namespace_prefix }}basic-nginx-build"
+dev_ns: "{{ namespace_prefix }}basic-nginx-dev"
+stage_ns: "{{ namespace_prefix }}basic-nginx-stage"
+prod_ns: "{{ namespace_prefix }}basic-nginx-prod"
+
 openshift_cluster_content:
 - object: projectrequest
   content:
   - name: basic-nginx-spaces
-    file: "{{ inventory_dir }}/../.openshift/projects/projects.yml"
+    file: "{{ inventory_dir }}/../.openshift/projects/projects.yml.j2"
     action: create
 - object: deployments
   content:
   - name: jenkins
-    namespace: basic-nginx-build
+    namespace: "{{ build_ns }}"
     template: openshift//jenkins-ephemeral
-  - name: basic-nginx-dev
+  - name: "{{ dev_ns }}"
+    namespace: "{{ dev_ns }}"
     template: "{{ inventory_dir }}/../.openshift/deployment/template.yml"
     params: "{{ inventory_dir }}/../.openshift/deployment/dev/params"
-  - name: basic-nginx-stage
+    params_from_vars:
+      NAMESPACE_PREFIX: "{{ namespace_prefix }}"
+  - name: "{{ stage_ns }}"
+    namespace: "{{ stage_ns }}"
     template: "{{ inventory_dir }}/../.openshift/deployment/template.yml"
     params: "{{ inventory_dir }}/../.openshift/deployment/stage/params"
-  - name: basic-nginx-prod
+    params_from_vars:
+      NAMESPACE_PREFIX: "{{ namespace_prefix }}"
+  - name: "{{ prod_ns }}"
+    namespace: "{{ prod_ns }}"
     template: "{{ inventory_dir }}/../.openshift/deployment/template.yml"
     params: "{{ inventory_dir }}/../.openshift/deployment/prod/params"
+    params_from_vars:
+      NAMESPACE_PREFIX: "{{ namespace_prefix }}"
 - object: builds
   content:
   - name: jenkins
     template: "{{ inventory_dir }}/../.openshift/builds/template.yml"
-    params: "{{ inventory_dir }}/../.openshift/builds/params"
     params_from_vars:
       SOURCE_REPOSITORY_URL: "{{ source_code_url }}"
       SOURCE_REPOSITORY_REF: "{{ source_code_ref }}"
       SKIP_MANUAL_PROMOTION: "{{ skip_manual_promotion }}"
+      NAMESPACE: "{{ build_ns }}"
+

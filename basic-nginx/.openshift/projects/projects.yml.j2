@@ -4,24 +4,24 @@ items:
 - apiVersion: project.openshift.io/v1
   kind: ProjectRequest
   metadata:
-    name: basic-nginx-dev
+    name: "{{ dev_ns }}"
     creationTimestam: null
   displayName: Basic Nginx App - Dev
 - apiVersion: project.openshift.io/v1
   kind: ProjectRequest
   metadata:
-    name: basic-nginx-stage
+    name: "{{ stage_ns }}"
     creationTimestam: null
   displayName: Basic Nginx App - Stage
 - apiVersion: project.openshift.io/v1
   kind: ProjectRequest
   metadata:
-    name: basic-nginx-prod
+    name: "{{ prod_ns }}"
     creationTimestam: null
-  displayName: Basic Tomcat App - Prod
+  displayName: Basic Nginx App - Prod
 - apiVersion: project.openshift.io/v1
   kind: ProjectRequest
   metadata:
-    name: basic-nginx-build
+    name: "{{ build_ns }}"
     creationTimestam: null
   displayName: Basic Nginx App - Build
