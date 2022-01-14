@@ -50,40 +50,6 @@ objects:
       app.kubernetes.io/managed-by: applier
     name: ${APPLICATION_NAME}
     namespace: ${NAMESPACE}
-- apiVersion: tekton.dev/v1alpha1
-  kind: PipelineResource
-  metadata:
-    labels:
-      app.kubernetes.io/name: ${APPLICATION_NAME}
-      app.kubernetes.io/instance: ${APPLICATION_NAME}-build
-      app.kubernetes.io/component: api
-      app.kubernetes.io/part-of: ${APPLICATION_NAME}
-      app.kubernetes.io/managed-by: applier
-    name: ${APPLICATION_NAME}-image
-    namespace: ${NAMESPACE}
-  spec:
-    type: image
-    params:
-    - name: url
-      value: image-registry.openshift-image-registry.svc:5000/${NAMESPACE}/${APPLICATION_NAME}
-- apiVersion: tekton.dev/v1alpha1
-  kind: PipelineResource
-  metadata:
-    labels:
-      app.kubernetes.io/name: ${APPLICATION_NAME}
-      app.kubernetes.io/instance: ${APPLICATION_NAME}-build
-      app.kubernetes.io/component: api
-      app.kubernetes.io/part-of: ${APPLICATION_NAME}
-      app.kubernetes.io/managed-by: applier
-    name: ${APPLICATION_NAME}-git
-    namespace: ${NAMESPACE}
-  spec:
-    type: git
-    params:
-    - name: url
-      value: ${APPLICATION_SOURCE_REPO}
-    - name: revision
-      value: ${APPLICATION_SOURCE_REF}
 - apiVersion: tekton.dev/v1beta1
   kind: Task
   metadata:
@@ -96,10 +62,8 @@ objects:
     name: maven-build-binary-build
     namespace: ${NAMESPACE}
   spec:
-    resources:
-      inputs:
-      - name: source
-        type: git
+    workspaces:
+    - name: source
     steps:
     - name: package
       image: maven:3.6.0-jdk-8-slim
@@ -185,17 +149,28 @@ objects:
     name: ${APPLICATION_NAME}-pipeline
     namespace: ${NAMESPACE}
   spec:
-    resources:
-    - name: ${APPLICATION_NAME}-git
-      type: git
+    workspaces:
+      - name: source
     tasks:
+    - name: git clone
+      taskRef:
+        # installed by openshift pipelines operators
+        name: git-clone
+        kind: ClusterTask
+      params:
+        - name: url
+          value: ${APPLICATION_SOURCE_REPO}
+        - name: revision
+          value: ${APPLICATION_SOURCE_REF}
+      workspaces:
+        - name: output
+          workspace: source
     - name: maven-build-binary-build
       taskRef:
         name: maven-build-binary-build
-      resources:
-        inputs:
+      workspaces:
         - name: source
-          resource: ${APPLICATION_NAME}-git
+          workspace: source
     - name: deploy-to-dev
       taskRef:
         name: deploy
